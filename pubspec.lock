@@ -209,6 +209,31 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.2.0"
+  rohd:
+    dependency: "direct main"
+    description:
+      path: "."
+      ref: main
+      resolved-ref: e8c2d1ffde87e6701c48148bd82e6a9aaf2992a9
+      url: "https://github.com/intel/rohd.git"
+    source: git
+    version: "0.6.6"
+  rohd_hcl:
+    dependency: "direct main"
+    description:
+      name: rohd_hcl
+      sha256: "2f97380982453f491a1eafb5349046e7f679a937825fcee7f42bdc7c2df1b8df"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.2.1"
+  rohd_vf:
+    dependency: "direct main"
+    description:
+      name: rohd_vf
+      sha256: "4034618094c7b31914952f19465680ce9424c04e419c7a9150c716fc3b9b83e4"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.6.0"
   shelf:
     dependency: transitive
     description:
