@@ -8,6 +8,7 @@ environment:
 
 # Add regular dependencies here.
 dependencies:
+  args: ^2.7.0
   path: ^1.9.0
   rohd: ^0.6.6
   rohd_hcl: ^0.2.1
