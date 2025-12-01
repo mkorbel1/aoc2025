@@ -8,17 +8,17 @@ import 'package:rohd_vf/rohd_vf.dart';
 
 enum Direction { right, left }
 
-class Day01 extends Module {
+class Day01p1 extends Module {
   late final Logic zeroCount;
 
-  Day01({
+  Day01p1({
     required Logic clk,
     required Logic reset,
     required Logic value,
     required Logic enable,
     required Logic direction,
     required int numInputs,
-  }) : super(name: 'day01') {
+  }) : super(name: 'day01p1') {
     clk = addInput('clk', clk);
     reset = addInput('reset', reset);
     value = addInput('value', value, width: value.width);
@@ -79,7 +79,7 @@ Future<void> main(List<String> args) async {
   final direction = Logic()..inject(0);
   final value = Logic(width: valWidth)..inject(0);
 
-  final dut = Day01(
+  final dut = Day01p1(
     clk: clk,
     reset: reset,
     value: value,
@@ -90,10 +90,10 @@ Future<void> main(List<String> args) async {
 
   await dut.build();
 
-  File('day01.sv').writeAsStringSync(dut.generateSynth());
+  File('day01p1.sv').writeAsStringSync(dut.generateSynth());
 
   // uncomment if you want to see waveforms
-  WaveDumper(dut, outputPath: 'day01.vcd');
+  WaveDumper(dut, outputPath: 'day01p1.vcd');
 
   unawaited(Simulator.run());
 
