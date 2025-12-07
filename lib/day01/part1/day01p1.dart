@@ -92,7 +92,6 @@ Future<void> main(List<String> args) async {
 
   File('day01p1.sv').writeAsStringSync(dut.generateSynth());
 
-  // uncomment if you want to see waveforms
   WaveDumper(dut, outputPath: 'day01p1.vcd');
 
   unawaited(Simulator.run());

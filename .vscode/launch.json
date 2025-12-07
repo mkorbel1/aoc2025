@@ -9,8 +9,13 @@
       "name": "aoc2025",
       "request": "launch",
       "type": "dart",
-      "args": ["-i", "lib/day01/part2/example.input.txt"],
-      "program": "lib/day01/part2/day01p2.dart"
+      "cwd": "lib/day07/part1",
+      "args": [
+        "-i",
+        // "example.input.txt"
+        "input.txt"
+      ],
+      "program": "day07p1.dart"
     }
   ]
 }
