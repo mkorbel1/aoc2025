@@ -1,25 +1,40 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:math';
 
 import 'package:args/args.dart';
 import 'package:rohd/rohd.dart';
 import 'package:rohd_hcl/rohd_hcl.dart';
 import 'package:rohd_vf/rohd_vf.dart';
 
-class Day07p1 extends Module {
+class Day07p2 extends Module {
   final int rowWidth;
 
-  late final Logic totalSplittersHitCount;
+  // a little bigger to be safe, looks square-ish, but consider that it could
+  // have a multiplicative effect each row
+  late final counterWidth = pow(log2Ceil(rowWidth), 2).toInt() * 2;
+
+  late final Logic totalSplittersHitCount = addOutput(
+    'totalSplittersHitCount',
+    width: counterWidth,
+  );
+
+  late final Logic totalTimelineCount = addOutput(
+    'totalTimelineCount',
+    width: counterWidth,
+  );
+
+  late final int reductionTreeLatency;
 
   /// Constructs a Day07p1 module.
   ///
   /// The [splitterVector] is `1` where there is a splitter and `0` elsewhere (open
   /// space).
-  Day07p1({
+  Day07p2({
     required Logic clk,
     required Logic reset,
     required Logic splitterVector,
-    super.name = 'day07p1',
+    super.name = 'day07p2',
   }) : rowWidth = splitterVector.width {
     clk = addInput('clk', clk);
     reset = addInput('reset', reset);
@@ -58,18 +73,58 @@ class Day07p1 extends Module {
       splitterHit,
     ).count.named('splittersHitCountInRow');
 
-    final totalSplittersHitCount = Counter.ofLogics(
-      [splittersHitCountInRow],
+    totalSplittersHitCount <=
+        Counter.ofLogics(
+          [splittersHitCountInRow],
+          clk: clk,
+          reset: reset,
+          width: counterWidth,
+        ).count;
+
+    final possiblePathsTo = LogicArray(
+      [rowWidth],
+      counterWidth,
+      name: 'possiblePathsTo',
+    );
+    for (var i = 0; i < rowWidth; i++) {
+      possiblePathsTo.elements[i] <=
+          flop(
+            clk,
+            reset: reset,
+            resetValue: i == rowWidth ~/ 2,
+            mux(
+              splitterVector[i],
+              Const(0, width: counterWidth),
+              [
+                if (i > 0)
+                  mux(
+                    splitterHit[i - 1],
+                    possiblePathsTo.elements[i - 1],
+                    Const(0, width: counterWidth),
+                  ),
+                if (i < rowWidth - 1)
+                  mux(
+                    splitterHit[i + 1],
+                    possiblePathsTo.elements[i + 1],
+                    Const(0, width: counterWidth),
+                  ),
+                possiblePathsTo.elements[i],
+              ].reduce((a, b) => a + b),
+            ),
+          );
+    }
+
+    final reductionTree = ReductionTree(
+      possiblePathsTo.elements,
       clk: clk,
       reset: reset,
-      width:
-          log2Ceil(rowWidth) *
-          2, // a little bigger to be safe, looks square-ish
-    ).count.named('totalSplittersHitCount');
-    this.totalSplittersHitCount = addOutput(
-      'totalSplittersHitCount',
-      width: totalSplittersHitCount.width,
-    )..gets(totalSplittersHitCount);
+      depthBetweenFlops: 1,
+      (elements, {control, depth = 0, name = 'sum'}) =>
+          elements.reduce((a, b) => a + b).named(name),
+    );
+
+    totalTimelineCount <= reductionTree.out;
+    reductionTreeLatency = reductionTree.latency;
   }
 }
 
@@ -93,13 +148,13 @@ Future<void> main(List<String> args) async {
   final splitterVector = Logic(width: lines[0].length, name: 'splitterVector')
     ..inject(0);
 
-  final dut = Day07p1(clk: clk, reset: reset, splitterVector: splitterVector);
+  final dut = Day07p2(clk: clk, reset: reset, splitterVector: splitterVector);
 
   await dut.build();
 
-  File('day07p1.sv').writeAsStringSync(dut.generateSynth());
+  File('day07p2.sv').writeAsStringSync(dut.generateSynth());
 
-  WaveDumper(dut, outputPath: 'day07p1.vcd');
+  WaveDumper(dut, outputPath: 'day07p2.vcd');
 
   unawaited(Simulator.run());
 
@@ -119,9 +174,10 @@ Future<void> main(List<String> args) async {
   }
 
   splitterVector.inject(0);
-  await clk.waitCycles(5);
+  await clk.waitCycles(5 + dut.reductionTreeLatency);
 
   await Simulator.endSimulation();
 
   print('Final split count: ${dut.totalSplittersHitCount.value.toInt()}');
+  print('Final timeline count: ${dut.totalTimelineCount.value.toInt()}');
 }

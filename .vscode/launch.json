@@ -4,9 +4,8 @@
   // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
   "version": "0.2.0",
   "configurations": [
-
     {
-      "name": "aoc2025",
+      "name": "aoc2025 day07p1",
       "request": "launch",
       "type": "dart",
       "cwd": "lib/day07/part1",
@@ -16,6 +15,18 @@
         "input.txt"
       ],
       "program": "day07p1.dart"
+    },
+    {
+      "name": "aoc2025 day07p2",
+      "request": "launch",
+      "type": "dart",
+      "cwd": "lib/day07/part2",
+      "args": [
+        "-i",
+        // "example.input.txt"
+        "input.txt"
+      ],
+      "program": "day07p2.dart"
     }
   ]
 }
